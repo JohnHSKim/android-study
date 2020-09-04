@@ -1,11 +1,13 @@
 #include <jni.h>
 #include <string>
 #include <android/log.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 // Example 2-03
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_example_myapplication_JNICallBackMethod_PrinttoString( JNIEnv *env,
-                                                                jobject obj ) {
+Java_com_example_myapplication_JNICallBackMethod_PrinttoString(JNIEnv *env,
+                                                               jobject obj) {
     jclass cls = env->GetObjectClass(obj);
     jmethodID mid = env->GetMethodID(cls, "toString", "()Ljava/lang/String;");
 
@@ -25,7 +27,7 @@ Java_com_example_myapplication_MainActivity_getLine(
         JNIEnv *env,
         jobject /* this */,
         jstring prompt,
-        jint value ) {
+        jint value) {
     const char *str = env->GetStringUTFChars(prompt, NULL);
     if (NULL == str)
         return NULL;
@@ -44,8 +46,14 @@ Java_com_example_myapplication_MainActivity_getLine(
 //Function overloading is not supported in C. So signature is needed to verify the functions
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_myapplication_MainActivity_stringFromJNI(
-        JNIEnv* env,
+        JNIEnv *env,
         jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
+//    std::string hello = "Hello from C++";
+//    return env->NewStringUTF(hello.c_str());
+
+    // Example 3-04
+    char dump[300];
+    sprintf(dump, "Process uid=%d, gid=%d, effective uid=%d, effective gid=%d \n", (int) getuid(),
+            (int) getgid(), (int) getegid(), (int) getegid());
+    return env->NewStringUTF(dump);
 }

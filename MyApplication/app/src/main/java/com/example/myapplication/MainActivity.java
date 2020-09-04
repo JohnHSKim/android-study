@@ -22,8 +22,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Example 2-01, call to a native method
-//        TextView tv = findViewById(R.id.sample_text);
-//        tv.setText(stringFromJNI());
+        TextView tv = findViewById(R.id.sample_text);
+        tv.setText(stringFromJNI());
 
         // Example 2-02, pass value to native
 //        String input = getLine("input value : ", 100);
