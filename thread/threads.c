@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+#define NTHREADS 4
+
+void *print_message ( void *arg ) {
+    printf("Start %d : Thread number %lu\n", (int) arg, pthread_self());
+    pthread_exit(0);
+}
+
 // pthread has to return void pointer
 // and takes a void pointer as an argument
 void* myturn( void * arg) {
@@ -42,7 +49,16 @@ int turn_example() {
 }
 
 int main() {
-    int ret = turn_example();
+    // int ret = turn_example();
+    pthread_t threads[NTHREADS];
+    int ret;
+    int status;
+
+    for (int i=0; i < NTHREADS; i++) {
+        ret = pthread_create(&threads[i], NULL, print_message, (void *) i);
+        pthread_join( threads[i], (void **) &status);
+        printf("Thread returns %d\n", status);
+    }
 
     return 0;
 }
