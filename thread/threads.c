@@ -1,13 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 
 // pthread has to return void pointer
 // and takes a void pointer as an argument
 void* myturn( void * arg) {
-    for (int i=0; i<10; i++)
+    for (int i=0; i<8; i++)
     {
         sleep(1);
-        printf("My turn!\n");
+        printf("My turn! %d\n", i);
     }
 
     return NULL;
@@ -17,14 +18,31 @@ void yourturn() {
     for (int i=0; i<3; i++)
     {
         sleep(2);
-        printf("Your turn!\n");
+        printf("Your turn! %d\n", i);
+    }
+}
+
+int turn_example() {
+    pthread_t newthread;
+    
+    if (pthread_create(&newthread, NULL, myturn, NULL) != 0)
+    {
+        printf("Error on pthread_create");
+        return 0;
+    }
+
+    yourturn();
+
+    // main thread and newthread will be in same group by pthread_join
+    if (pthread_join(newthread, NULL) != 0)
+    {
+        printf("Error on pthread_join");
+        return 0;
     }
 }
 
 int main() {
-    pthread_t newthread;
-    pthread_create(&newthread, NULL, myturn, NULL);
-    yourturn();
+    int ret = turn_example();
 
     return 0;
 }
