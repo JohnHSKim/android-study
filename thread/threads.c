@@ -5,6 +5,7 @@
 #define NTHREADS 4
 
 void *print_message ( void *arg ) {
+    pthread_detach(pthread_self());
     printf("Start %d : Thread number %lu\n", (int) arg, pthread_self());
     pthread_exit(0);
 }
@@ -56,9 +57,8 @@ int main() {
 
     for (int i=0; i < NTHREADS; i++) {
         ret = pthread_create(&threads[i], NULL, print_message, (void *) i);
-        pthread_join( threads[i], (void **) &status);
-        printf("Thread returns %d\n", status);
     }
+    sleep(1);
 
     return 0;
 }
