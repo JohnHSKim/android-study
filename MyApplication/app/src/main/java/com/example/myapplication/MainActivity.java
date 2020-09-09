@@ -2,75 +2,64 @@ package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class MainActivity extends AppCompatActivity {
-    public int i = 0, j = 0;
-    private static final String TAG = "MayActivity";
-    TextView textView;
-    EditText ei;
-    EditText ej;
+    static {
+        System.loadLibrary("native-lib");
+    }
+
+    public native void nativeProcessBitmap(Bitmap bitmap);
+
+    private ImageView mImg1, mImg2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Example 2-01, call to a native method
-        TextView tv = findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
-
-        // Example 2-02, pass value to native
-//        String input = getLine("input value : ", 100);
-//        tv.setText(input);
-
-        // Example 2-03, Call java method from native
-        textView = findViewById(R.id.label);
-        ei = findViewById(R.id.i);
-        ej = findViewById(R.id.j);
-
-        Button button = (Button)findViewById(R.id.sum);
-        button.setOnClickListener(saveListener);
+        mImg1 = (ImageView) findViewById(R.id.img_test1);
+        mImg2 = (ImageView) findViewById(R.id.img_test2);
     }
 
-    private View.OnClickListener saveListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            try {
-                i = Integer.parseInt(ei.getText().toString());
-            } catch (NumberFormatException e) {
-                i = 0;
-            }
+    public void onLoadClick(View view) {
+        Bitmap originalBitmap = loadBitmap();
+        mImg1.setImageBitmap(originalBitmap);
 
-            try {
-                j = Integer.parseInt(ej.getText().toString());
-            } catch (NumberFormatException e) {
-                j = 0;
-            }
+        Bitmap resultBitmap = processBitmap(originalBitmap);
+        mImg2.setImageBitmap(resultBitmap);
+    }
 
-            JNICallBackMethod m = new JNICallBackMethod(i, j);
-            String s = "return method " + m.PrinttoString();
-
-            Log.v(TAG, s);
-            textView.setText(s);
+    private Bitmap loadBitmap() {
+        Bitmap bmp = null;
+        AssetManager am = getResources().getAssets();
+        try {
+            InputStream is = am.open("cat.png");
+            bmp = BitmapFactory.decodeStream(is);
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    };
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
-
-    private native String getLine(String prompt, int value);
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
+        return bmp;
     }
+
+    private Bitmap processBitmap(Bitmap bitmap) {
+        Bitmap bmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+        nativeProcessBitmap(bmp);
+        return bmp;
+    }
+
 
 }
